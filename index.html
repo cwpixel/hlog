@@ -313,6 +313,9 @@ body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidd
 </div>
 
 <script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister()));
+}
 const DAY=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const MMAX={bupropion:300,adderall:10,zolpidem:10};
