@@ -307,6 +307,10 @@ body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidd
         <button class="mbtn" id="ms-btn" onclick="logTraining('strength')">&#x1F4AA; Strength</button>
         <button class="mbtn" id="mc-btn" onclick="logTraining('cardio')">&#x1F6B4; Cardio</button>
       </div>
+      <div class="trow">
+        <input class="tinp" id="t-training" placeholder="auto">
+        <span class="thint">optional &mdash; leave blank for now</span>
+      </div>
       <div class="mtags" id="trainingTags"></div>
       <div style="margin-top:8px"><button class="ubtn" onclick="undoTraining()">undo last</button></div>
     </div>
@@ -475,7 +479,7 @@ function quickAll(){
   checkRollover();
   const t=gt('qTime');
   S.meds.prog=t;renderSimple('prog');
-  S.meds.testo=hm();renderSimple('testo');
+  S.meds.testo=t;renderSimple('testo');
   if(isPatch()){S.meds.patch=t;S.meds.patch_off=false;renderSimple('patch');}
   persist();
 }
@@ -533,7 +537,17 @@ function renderMeals(){
     +' <span style="opacity:.4;cursor:pointer" onclick="removeMeal('+i+')">\xd7</span></span>').join('');
 }
 
-function logTraining(type){checkRollover();if(!S.training)S.training=[];S.training.push({type,t:hm(),ap:ampm()});renderTraining();persist();}
+function logTraining(type){
+  checkRollover();
+  if(!S.training)S.training=[];
+  const tEl=$('t-training');
+  const t=(tEl&&tEl.value.trim())?parseT(tEl.value):hm();
+  const hr=parseInt(t.slice(0,2),10);
+  const ap=hr<12?'AM':'PM';
+  S.training.push({type,t,ap});
+  if(tEl)tEl.value='';
+  renderTraining();persist();
+}
 function undoTraining(){if(S.training&&S.training.length){S.training.pop();renderTraining();persist();}}
 function removeTraining(i){S.training.splice(i,1);renderTraining();persist();}
 function renderTraining(){
@@ -556,9 +570,10 @@ function renderVitals(){
       }).join('')+'</div></div>').join('')
     +'</div></div>').join('');
 }
-function setV(k,v){S[k]=S[k]===v?null:v;renderVitals();persist();}
+function setV(k,v){checkRollover();S[k]=S[k]===v?null:v;renderVitals();persist();}
 
 function saveNotes(){
+  checkRollover();
   S.notes=$('notesTxt').value;
   persist();
   $('noteMsg').textContent='\u2713 saved '+hm();
@@ -572,7 +587,8 @@ function renderHistory(){
   if(!rows.length){el.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted)">No entries yet</div>';return;}
   const sm=(e,id,lbl)=>{
     const t=e.meds?.[id],off=id==='patch'&&e.meds?.patch_off;
-    return '<span class="htag '+(t?(off?'off':'on'):'')+'">'+lbl+(t&&typeof t==='string'?' '+t:'')+(off?' \u26A0':'')+'</span>';
+    if(!t)return '';
+    return '<span class="htag '+(off?'off':'on')+'">'+lbl+(typeof t==='string'?' '+t:'')+(off?' \u26A0':'')+'</span>';
   };
   el.innerHTML=rows.map(e=>{
     const d=new Date(e.date+'T12:00:00'),dow=d.getDay();
