@@ -334,6 +334,7 @@ body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidd
 
   <div class="scr" id="s-history">
     <button class="expbtn" onclick="doExport()">&#x2193; Export JSON backup</button>
+    <button class="clearbtn" onclick="clearAll()">&#x26A0; Clear All Data (permanent)</button>
     <div id="histOut"></div>
   </div>
 
@@ -358,7 +359,7 @@ function ampm(){const h=now().getHours();return h<12?'AM':'PM';}
 function p2(n){return String(n).padStart(2,'0');}
 function parseT(v){
   if(!v||!v.trim())return hm();
-  v=v.trim().toLowerCase();
+  v=v.trim().toLowerCase().replace(/[.,]/g,':');
   let m=v.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
   if(m){let h=+m[1],mn=m[2]?+m[2]:0;if(m[3]==='am'&&h===12)h=0;if(m[3]==='pm'&&h!==12)h+=12;return p2(h)+':'+p2(mn);}
   m=v.match(/^(\d{1,2}):(\d{2})$/)||v.match(/^(\d{2})(\d{2})$/);
@@ -401,6 +402,16 @@ function clearToday(){
   sSet('hlog5',DB);
   S=blank();
   renderAll();
+}
+
+function clearAll(){
+  const r=prompt('This will permanently delete ALL logged data.\n\nType DELETE (in caps) to confirm.');
+  if(r!=='DELETE'){alert('Cancelled. No data was deleted.');return;}
+  localStorage.removeItem('hlog5');
+  DB=[];
+  S=blank();
+  renderAll();
+  alert('All data cleared.');
 }
 
 function updateHeader(){
